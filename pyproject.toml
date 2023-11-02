@@ -1,14 +1,17 @@
 [tool.poetry]
 name = "hexlet-code"
 version = "0.1.0"
-description = "page analizer"
+description = "page analyzer"
 authors = ["slavanr45 <slava.r45@gmail.com>"]
 readme = "README.md"
-packages = [{include = "page_analizer"}]
+packages = [{include = "page_analyzer"}]
+repository = "https://github.com/slavanr45/python-project-83"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 flask = "^3.0.0"
+gunicorn = "^21.2.0"
+python-dotenv = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
