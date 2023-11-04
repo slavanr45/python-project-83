@@ -12,4 +12,4 @@ if os.path.exists(dotenv_path):
 
 @app.route('/')
 def index():
-    return 'Hello world!'
+    return f'{dotenv_path} {app.secret_key}'
