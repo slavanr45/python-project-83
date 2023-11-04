@@ -1,2 +1,5 @@
-def test_free():
-    assert 1 == 1
+from page_analyzer.app import index
+
+
+def test_first():
+    assert index() == 'Hello world!'
