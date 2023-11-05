@@ -1,5 +1,5 @@
-from page_analyzer.app import index
+from page_analyzer.app import test1
 
 
 def test_first():
-    assert index() == 'Hello world!'
+    assert test1 == 'test1'
