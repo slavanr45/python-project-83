@@ -1,6 +1,10 @@
-import os
-from dotenv import load_dotenv
+import os  # доступ к переменным окружения
+from dotenv import load_dotenv  # загрузка переменных окружения
 import pathlib
+import psycopg2
+from psycopg2.extras import NamedTupleCursor
+from psycopg2 import Error
+from contextlib import closing  # расш функционал контекстного меню
 from flask import (
     Flask,
     render_template,
@@ -8,16 +12,40 @@ from flask import (
 )
 
 app = Flask(__name__)
-# загрузка переменных окружения из скрытого файла
+# удалить тестилку
+test1 = 'test1'
+# загрузка переменных окружения из скрытого файла на папку выше
 dotenv_path = pathlib.Path(pathlib.Path.cwd(), ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
     app.secret_key = os.getenv('SECRET')
-test1 = 'test1'
+    DATABASE_URL = os.getenv('DATABASE_URL')
+
+data = None
+try:
+    # коннект к существуюей базе данных с помощью DATABASE_URL
+    # Параметры соединения взяты из файла .env
+    with closing(psycopg2.connect(DATABASE_URL)) as connection:
+        print('Connection to database established!')
+        # получение объекта cursor для доступа к БД.
+        # Работаем через контекстный менеджер, для освобождения курсора
+        with connection.cursor(cursor_factory=NamedTupleCursor) as curs:
+            # выполняем SQL запрос
+            curs.execute('INSERT INTO urls (name, created_at) VALUES (%s,%s)', ('NewName', None))
+            connection.commit()
+            curs.execute('SELECT * FROM urls')
+            # получение даных cursor.fetchall() - вернуть все строки
+            data = curs.fetchall()
+except (Exception, Error) as error:
+    # в случае сбоя подключения будет выведено сообщение
+    print('Can`t establish connection to database', error)
 
 
 @app.route('/')
 def index():
-    mes = get_flashed_messages(with_categories=True)
-    return render_template(
-        'index.html', messages=mes)
+    if data:
+        return f'{data}'
+    else:
+        mes = get_flashed_messages(with_categories=True)
+        return render_template(
+            'index.html', messages=mes)
