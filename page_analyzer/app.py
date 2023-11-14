@@ -19,13 +19,13 @@ dotenv_path = pathlib.Path(pathlib.Path.cwd(), ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
     app.secret_key = os.getenv('SECRET')
-    DB_URL = os.getenv('DB_URL')
+    DATABASE_URL = os.getenv('DATABASE_URL')
 
 data = None
 try:
     # коннект к существуюей базе данных с помощью DB_URL
     # Параметры соединения взяты из файла .env
-    with closing(psycopg2.connect(DB_URL)) as connection:
+    with closing(psycopg2.connect(DATABASE_URL)) as connection:
         print('Connection to database established!')
         # получение объекта cursor для доступа к БД.
         # Работаем через контекстный менеджер, для освобождения курсора
