@@ -19,19 +19,19 @@ dotenv_path = pathlib.Path(pathlib.Path.cwd(), ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
     app.secret_key = os.getenv('SECRET')
-    DATABASE_URL = os.getenv('DATABASE_URL')
+    DB_URL = os.getenv('DB_URL')
 
 data = None
 try:
-    # коннект к существуюей базе данных с помощью DATABASE_URL
+    # коннект к существуюей базе данных с помощью DB_URL
     # Параметры соединения взяты из файла .env
-    with closing(psycopg2.connect(DATABASE_URL)) as connection:
+    with closing(psycopg2.connect(DB_URL)) as connection:
         print('Connection to database established!')
         # получение объекта cursor для доступа к БД.
         # Работаем через контекстный менеджер, для освобождения курсора
         with connection.cursor(cursor_factory=NamedTupleCursor) as curs:
             # выполняем SQL запрос
-            curs.execute('INSERT INTO urls (name, created_at) VALUES (%s,%s)', ('NewName', None))
+            # curs.execute('INSERT INTO urls (name, created_at) VALUES (%s,%s)', ('NewName', None))
             connection.commit()
             curs.execute('SELECT * FROM urls')
             # получение даных cursor.fetchall() - вернуть все строки

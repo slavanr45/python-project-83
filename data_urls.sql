@@ -1,1 +1,1 @@
-INSERT INTO urls (name, created_at) VALUES (%s,%s)', ('NewName', None)
+INSERT INTO urls (name) VALUES ('Bash'), ('PHP'), ('Ruby'), ('test');
