@@ -15,11 +15,14 @@ app = Flask(__name__)
 # удалить тестилку
 test1 = 'test1'
 # загрузка переменных окружения из скрытого файла на папку выше
-dotenv_path = pathlib.Path(pathlib.Path.cwd(), ".env")
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
-    app.secret_key = os.getenv('SECRET')
-    DATABASE_URL = os.getenv('DATABASE_URL')
+# dotenv_path = pathlib.Path(pathlib.Path.cwd(), ".env")
+# if os.path.exists(dotenv_path):
+#     load_dotenv(dotenv_path)
+#     app.secret_key = os.getenv('SECRET')
+#     DATABASE_URL = os.getenv('DATABASE_URL')
+
+load_dotenv()
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 data = None
 try:
