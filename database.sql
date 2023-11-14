@@ -4,3 +4,5 @@ CREATE TABLE urls (
     name varchar(255),
     created_at timestamp
 );
+
+INSERT INTO urls (name) VALUES ('Bash'), ('PHP'), ('Ruby'), ('test');

@@ -1,1 +1,0 @@
-INSERT INTO urls (name) VALUES ('Bash'), ('PHP'), ('Ruby'), ('test');
