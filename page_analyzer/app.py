@@ -20,9 +20,10 @@ test1 = 'test1'
 #     load_dotenv(dotenv_path)
 #     app.secret_key = os.getenv('SECRET')
 #     DATABASE_URL = os.getenv('DATABASE_URL')
-
 load_dotenv()
+app.secret_key = os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
+
 
 data = None
 try:
