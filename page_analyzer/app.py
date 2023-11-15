@@ -6,8 +6,8 @@ from psycopg2 import Error
 from contextlib import closing  # расш функционал контекстного меню
 from flask import (
     Flask,
-    render_template,
-    get_flashed_messages,
+    # render_template,
+    # get_flashed_messages,
 )
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ except (Exception, Error) as error:
 @app.route('/')
 def index():
     # if data or DATABASE_URL:
-    return f'{data} {DATABASE_URL}'
+    return f'{data} {DATABASE_URL} '
     # else:
     #     mes = get_flashed_messages(with_categories=True)
     #     return render_template(
