@@ -41,9 +41,9 @@ except (Exception, Error) as error:
 
 @app.route('/')
 def index():
-    if data:
-        return f'{app.secret_key}, {DATABASE_URL}'
-    else:
-        mes = get_flashed_messages(with_categories=True)
-        return render_template(
-            'index.html', messages=mes)
+    # if data:
+    return f'{app.secret_key}, {DATABASE_URL}'
+    # else:
+    #     mes = get_flashed_messages(with_categories=True)
+    #     return render_template(
+    #         'index.html', messages=mes)
