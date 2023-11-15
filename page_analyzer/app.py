@@ -30,7 +30,7 @@ try:
         with connection.cursor(cursor_factory=NamedTupleCursor) as curs:
             # выполняем SQL запрос
             # curs.execute('INSERT INTO urls (name, created_at) VALUES (%s,%s)', ('NewName', None))
-            connection.commit()
+            # connection.commit()
             curs.execute('SELECT * FROM urls')
             # получение даных cursor.fetchall() - вернуть все строки
             data = curs.fetchall()
@@ -42,7 +42,7 @@ except (Exception, Error) as error:
 @app.route('/')
 def index():
     if data:
-        return f'{data} {DATABASE_URL} '
+        return f'{data}'
     else:
         mes = get_flashed_messages(with_categories=True)
         return render_template(
