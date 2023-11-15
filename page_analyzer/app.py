@@ -41,7 +41,7 @@ except (Exception, Error) as error:
 
 @app.route('/')
 def index():
-    if data:
+    if data or DATABASE_URL:
         return f'{data}, {DATABASE_URL}'
     else:
         mes = get_flashed_messages(with_categories=True)
