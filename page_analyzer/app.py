@@ -1,6 +1,5 @@
 import os  # доступ к переменным окружения
 from dotenv import load_dotenv  # загрузка переменных окружения
-import pathlib
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
@@ -14,12 +13,7 @@ from flask import (
 app = Flask(__name__)
 # удалить тестилку
 test1 = 'test1'
-# загрузка переменных окружения из скрытого файла на папку выше
-# dotenv_path = pathlib.Path(pathlib.Path.cwd(), ".env")
-# if os.path.exists(dotenv_path):
-#     load_dotenv(dotenv_path)
-#     app.secret_key = os.getenv('SECRET')
-#     DATABASE_URL = os.getenv('DATABASE_URL')
+# загрузка переменных окружения из скрытого файла
 load_dotenv()
 app.secret_key = os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -48,7 +42,7 @@ except (Exception, Error) as error:
 @app.route('/')
 def index():
     if data:
-        return f'{data}'
+        return f'{app.secret_key}, {DATABASE_URL}'
     else:
         mes = get_flashed_messages(with_categories=True)
         return render_template(
