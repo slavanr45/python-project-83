@@ -7,6 +7,7 @@ from contextlib import closing  # расш функционал контекст
 from flask import (
     Flask,
     render_template,
+    flash,
     get_flashed_messages,
 )
 
@@ -41,9 +42,6 @@ except (Exception, Error) as error:
 
 @app.route('/')
 def index():
-    if data:
-        return f'{data} /n{app.secret_key} /n {DATABASE_URL}'
-    else:
-        mes = get_flashed_messages(with_categories=True)
-        return render_template(
-            'index.html', messages=mes)
+    mes = get_flashed_messages(with_categories=True)
+    return render_template(
+        'index.html', messages=mes)
