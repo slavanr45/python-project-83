@@ -1,14 +1,18 @@
 import os  # доступ к переменным окружения
 from dotenv import load_dotenv  # загрузка переменных окружения
+import validators
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
 from contextlib import closing  # расш функционал контекстного меню
 from flask import (
     Flask,
+    redirect,
     render_template,
+    request,
     flash,
     get_flashed_messages,
+    url_for
 )
 
 app = Flask(__name__)
@@ -40,8 +44,46 @@ except (Exception, Error) as error:
     print('Can`t establish connection to database', error)
 
 
+# стартовая страница
 @app.route('/')
 def index():
     mes = get_flashed_messages(with_categories=True)
     return render_template(
         'index.html', messages=mes)
+
+
+# Создание сущности (Create). Обработка данных формы от index.html
+@app.route('/urls', methods=['post'])
+def urls_post():
+    url = request.form.get('url', '')
+    err = validate(url)
+    if err:
+        flash(err, "alert alert-danger")
+        return redirect(url_for('index'))
+    flash('Страница успешно добавлена', "alert alert-success")
+    return redirect(url_for('urls_show'))
+
+
+def validate(url: str) -> str:
+    err = ''
+    if not url:
+        err = 'URL обязателен'
+    elif len(url) > 255 or not validators.url(url):
+        err = 'Некорректный URL'
+    return err
+
+
+# Список проверенных сайтов (Read)
+@app.route('/urls')
+def urls_get():
+    mes = get_flashed_messages(with_categories=True)
+    return render_template(
+        'urls/index.html', messages=mes)
+
+
+# Отображение (show.html)  -  cRud
+@app.route('/urlss')
+def urls_show():
+    mes = get_flashed_messages(with_categories=True)
+    return render_template(
+        'urls/show.html', messages=mes)
