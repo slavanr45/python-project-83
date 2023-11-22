@@ -1,6 +1,7 @@
 import os  # доступ к переменным окружения
 from dotenv import load_dotenv  # загрузка переменных окружения
-import validators
+import validators  # проверка url
+from urllib.parse import urlparse  # парсинг url
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
@@ -56,10 +57,11 @@ def index():
 @app.route('/urls', methods=['post'])
 def urls_post():
     url = request.form.get('url', '')
-    err = validate(url)
-    if err:
+    err = validate(url)  # проверка корректности url
+    if err:  # при ошибке возврат на стартовую страницу с выводом ошибки
         flash(err, "alert alert-danger")
         return redirect(url_for('index'))
+    url = f'{urlparse(url).scheme}://{urlparse(url).hostname}'
     flash('Страница успешно добавлена', "alert alert-success")
     return redirect(url_for('urls_show'))
 
