@@ -37,28 +37,24 @@
             </tr>
           </thead>
           <tbody>
+            {% for rec in data %}
             <tr>
-              <td>2</td>
-              <td><a href="/urls/2">https://www.d3.ru</a></td>
-              <td>2023-11-21</td>
+              <td>{{ rec.id }}</td>
+              <td><a href="/urls/2">{{ rec.name }}</a></td>
+              <td>{{ rec.created_at }}</td>
               <td>200</td>
             </tr>
-        
-            <tr>
-              <td>1</td>
-              <td><a href="/urls/1">http://stub.com</a></td>
-              <td>2023-11-21</td>
-              <td>200</td>
-            </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
   </main>
+
   <footer class="border-top py-3 mt-5 flex-shrink-0">
     <div class="container-lg">
       <div class="text-center">
-        <a href="https://ru.hexlet.io/" target="_blank">Hexlet</a>
+        <p class="text-secondary">Created by Slava Nechaev</p>
       </div>
     </div>
   </footer>
