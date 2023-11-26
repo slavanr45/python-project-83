@@ -48,15 +48,19 @@ def urls_post():
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             print('Connection to database established!')
-            # получение объекта cursor для доступа к БД.
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 dt = date.today()
                 cur.execute('INSERT INTO urls (name, created_at) VALUES (%s, %s)', (url, dt))
                 connection.commit()
+                cur.execute("""SELECT id
+                               FROM urls
+                               ORDER BY id DESC
+                               LIMIT 1""")
+                id = cur.fetchone().id
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     flash('Страница успешно добавлена', "alert alert-success")
-    return redirect(url_for('urls_show'))
+    return redirect(url_for('url_get', id=id))
 
 
 def validate(url: str) -> str:
@@ -75,7 +79,6 @@ def urls_get():
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             print('Connection to database established!')
-            # получение объекта cursor для доступа к БД.
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
                                 FROM urls
@@ -90,19 +93,17 @@ def urls_get():
 
 
 # Отображение (show.html)  -  cRud
-@app.route('/urlss')
-def urls_show():
+@app.route('/urls/<int:id>')
+def url_get(id):
     try:
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             print('Connection to database established!')
-            # получение объекта cursor для доступа к БД.
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
                                 FROM urls
-                                ORDER BY id DESC
-                                LIMIT 1"""
-                cur.execute(sql_query)
+                                WHERE id = (%s)"""
+                cur.execute(sql_query, (id,))
                 curent_url = cur.fetchone()
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
