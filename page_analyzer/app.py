@@ -77,9 +77,10 @@ def urls_get():
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
-                sql_query = """SELECT *
-                                FROM urls
-                                ORDER BY id DESC"""
+                sql_query = """SELECT urls.id, urls.name, url_checks.created_at
+                                FROM urls LEFT JOIN url_checks
+                                ON urls.id = url_checks.url_id
+                                ORDER BY urls.id DESC;"""
                 cur.execute(sql_query)
                 data = cur.fetchall()
     except (Exception, Error) as error:
@@ -89,7 +90,7 @@ def urls_get():
         data=data)
 
 
-# Отображение (show.html)  -  cRud
+# Отображение (show.html) - cRud
 @app.route('/urls/<int:id>')
 def url_get(id):
     try:
@@ -101,11 +102,35 @@ def url_get(id):
                                 WHERE id = (%s)"""
                 cur.execute(sql_query, (id,))
                 curent_url = cur.fetchone()
-                print(curent_url)
+                sql_query = """SELECT *
+                                FROM url_checks
+                                WHERE url_id = (%s)
+                                ORDER BY id DESC"""
+                cur.execute(sql_query, (id,))
+                url_check = cur.fetchall()
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     mes = get_flashed_messages(with_categories=True)
     return render_template(
         'urls/show.html',
         curent_url=curent_url,
+        url_check=url_check,
         messages=mes)
+
+
+# Обновление сущности (Update). Обработка данных формы от show.html
+@app.route('/urls/<int:id>/checks', methods=['post'])
+def url_post(id):
+    try:
+        # коннект к существуюей базе данных с помощью DB_URL
+        with closing(psycopg2.connect(DATABASE_URL)) as connection:
+            with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
+                dt = date.today()
+                sql_query = '''INSERT INTO url_checks (url_id, created_at)
+                                VALUES (%s, %s)'''
+                cur.execute(sql_query, (id, dt))
+                connection.commit()  # подтверждение изменения
+    except (Exception, Error) as error:
+        print('Can`t establish connection to database', error)
+    flash('Страница успешно проверена', "alert alert-success")
+    return redirect(url_for('url_get', id=id))

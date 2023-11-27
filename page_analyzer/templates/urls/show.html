@@ -29,7 +29,7 @@
   
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
-      <h1>Сайт: https://ww.d3.ru</h1>
+      <h1>Сайт: {{ curent_url.name }}</h1>
     
       <div class="table-responsive">
         <table class="table table-bordered table-hover text-nowrap" data-test="url">
@@ -51,7 +51,7 @@
       </div>
 
       <h2 class="mt-5 mb-3">Проверки</h2>
-      <form method="post" action="/urls/2/checks">
+      <form method="post" action="/urls/{{ curent_url.id }}/checks">
         <input type="submit" class="btn btn-primary" value="Запустить проверку">
       </form>
     
@@ -68,14 +68,16 @@
             </tr>
           </thead>
           <tbody>
+            {% for check in url_check %}
             <tr>
-              <td>{{ curent_url.id }}</td>
+              <td>{{ check.id }}</td>
               <td></td>
               <td></td>
               <td></td>
               <td></td>
-              <td>{{ curent_url.created_at }}</td>
-            </tr>          
+              <td>{{ check.created_at }}</td>
+            </tr>
+            {% endfor %}          
           </tbody>
         </table>
       </div>

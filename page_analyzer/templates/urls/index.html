@@ -40,8 +40,8 @@
             {% for rec in data %}
             <tr>
               <td>{{ rec.id }}</td>
-              <td><a href="/urls/2">{{ rec.name }}</a></td>
-              <td>{{ rec.created_at }}</td>
+              <td><a href="/urls/{{ rec.id }}">{{ rec.name }}</a></td>
+              <td>{% if rec.created_at %}{{ rec.created_at }}{% endif %}</td>
               <td>200</td>
             </tr>
             {% endfor %}
