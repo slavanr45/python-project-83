@@ -47,15 +47,13 @@ def urls_post():
     try:
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
-            print('Connection to database established!')
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 dt = date.today()
-                cur.execute('INSERT INTO urls (name, created_at) VALUES (%s, %s)', (url, dt))
-                connection.commit()
-                cur.execute("""SELECT id
-                               FROM urls
-                               ORDER BY id DESC
-                               LIMIT 1""")
+                sql_query = '''INSERT INTO urls (name, created_at)
+                                VALUES (%s, %s)
+                                RETURNING id'''
+                cur.execute(sql_query, (url, dt))
+                connection.commit()  # подтверждение изменения
                 id = cur.fetchone().id
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
@@ -78,7 +76,6 @@ def urls_get():
     try:
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
-            print('Connection to database established!')
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
                                 FROM urls
@@ -98,13 +95,13 @@ def url_get(id):
     try:
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
-            print('Connection to database established!')
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
                                 FROM urls
                                 WHERE id = (%s)"""
                 cur.execute(sql_query, (id,))
                 curent_url = cur.fetchone()
+                print(curent_url)
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     mes = get_flashed_messages(with_categories=True)
