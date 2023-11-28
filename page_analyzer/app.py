@@ -6,6 +6,7 @@ from datetime import date
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
+import requests
 from contextlib import closing  # расш функционал контекстного меню
 from flask import (
     Flask,
@@ -48,16 +49,25 @@ def urls_post():
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
-                dt = date.today()
-                sql_query = '''INSERT INTO urls (name, created_at)
-                                VALUES (%s, %s)
-                                RETURNING id'''
-                cur.execute(sql_query, (url, dt))
-                connection.commit()  # подтверждение изменения
-                id = cur.fetchone().id
+                sql_query = """SELECT id
+                               FROM urls
+                               WHERE name = (%s)"""
+                cur.execute(sql_query, (url,))
+                query_data = cur.fetchone()
+                if query_data is not None:
+                    id = query_data.id
+                    flash('Страница уже существует', "alert alert-info")
+                else:
+                    dt = date.today()
+                    sql_query = '''INSERT INTO urls (name, created_at)
+                                   VALUES (%s, %s)
+                                   RETURNING id'''
+                    cur.execute(sql_query, (url, dt))
+                    connection.commit()  # подтверждение изменения
+                    id = cur.fetchone().id
+                    flash('Страница успешно добавлена', "alert alert-success")
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
-    flash('Страница успешно добавлена', "alert alert-success")
     return redirect(url_for('url_get', id=id))
 
 
@@ -77,10 +87,14 @@ def urls_get():
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
-                sql_query = """SELECT urls.id, urls.name, url_checks.created_at
-                                FROM urls LEFT JOIN url_checks
-                                ON urls.id = url_checks.url_id
-                                ORDER BY urls.id DESC;"""
+                sql_query = """SELECT
+                                    urls.id,
+                                    urls.name,
+                                    url_checks.status_code,
+                                    url_checks.created_at
+                               FROM urls LEFT JOIN url_checks
+                               ON urls.id = url_checks.url_id
+                               ORDER BY urls.id DESC;"""
                 cur.execute(sql_query)
                 data = cur.fetchall()
     except (Exception, Error) as error:
@@ -98,14 +112,14 @@ def url_get(id):
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
-                                FROM urls
-                                WHERE id = (%s)"""
+                               FROM urls
+                               WHERE id = (%s)"""
                 cur.execute(sql_query, (id,))
                 curent_url = cur.fetchone()
                 sql_query = """SELECT *
-                                FROM url_checks
-                                WHERE url_id = (%s)
-                                ORDER BY id DESC"""
+                               FROM url_checks
+                               WHERE url_id = (%s)
+                               ORDER BY id DESC"""
                 cur.execute(sql_query, (id,))
                 url_check = cur.fetchall()
     except (Exception, Error) as error:
@@ -125,12 +139,22 @@ def url_post(id):
         # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
+                sql_query = """SELECT *
+                               FROM urls
+                               WHERE id = (%s)"""
+                cur.execute(sql_query, (id,))
+                query_data = cur.fetchone()
+                data = requests.get(query_data.name)
+                status_code = data.status_code
+                if status_code != 200:
+                    flash('Произошла ошибка при проверке', "alert alert-danger")
+                    return redirect(url_for('url_get', id=id))
                 dt = date.today()
-                sql_query = '''INSERT INTO url_checks (url_id, created_at)
-                                VALUES (%s, %s)'''
-                cur.execute(sql_query, (id, dt))
+                sql_query = '''INSERT INTO url_checks (url_id, status_code, created_at)
+                               VALUES (%s, %s, %s)'''
+                cur.execute(sql_query, (id, status_code, dt))
                 connection.commit()  # подтверждение изменения
+                flash('Страница успешно проверена', "alert alert-success")
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
-    flash('Страница успешно проверена', "alert alert-success")
     return redirect(url_for('url_get', id=id))

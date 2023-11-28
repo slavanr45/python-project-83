@@ -71,7 +71,7 @@
             {% for check in url_check %}
             <tr>
               <td>{{ check.id }}</td>
-              <td></td>
+              <td>{% if check.status_code %}{{ check.status_code }}{% endif %}</td>
               <td></td>
               <td></td>
               <td></td>

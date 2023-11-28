@@ -42,7 +42,7 @@
               <td>{{ rec.id }}</td>
               <td><a href="/urls/{{ rec.id }}">{{ rec.name }}</a></td>
               <td>{% if rec.created_at %}{{ rec.created_at }}{% endif %}</td>
-              <td>200</td>
+              <td>{% if rec.status_code %}{{ rec.status_code }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
