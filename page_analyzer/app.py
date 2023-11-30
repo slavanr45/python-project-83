@@ -1,13 +1,13 @@
-import os  # доступ к переменным окружения
-from dotenv import load_dotenv  # загрузка переменных окружения
-import validators  # проверка url
-from urllib.parse import urlparse  # парсинг url
+import os  # access to environment variables
+from dotenv import load_dotenv  # load environment variables
+import validators  # check url
+from urllib.parse import urlparse
 from datetime import date
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
 import requests
-from contextlib import closing  # расш функционал контекстного меню
+from contextlib import closing  # improving functional context menu
 from flask import (
     Flask,
     redirect,
@@ -21,13 +21,13 @@ from flask import (
 app = Flask(__name__)
 # удалить тестилку
 test1 = 'test1'
-# загрузка переменных окружения из скрытого файла
+# load environment variables from hidden file
 load_dotenv()
 app.secret_key = os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-# стартовая страница
+# starting page
 @app.route('/')
 def index():
     mes = get_flashed_messages(with_categories=True)
@@ -35,18 +35,17 @@ def index():
         'index.html', messages=mes)
 
 
-# Создание сущности (Create). Обработка данных формы от index.html
+# Create entity (Crud). Processing data form index.html
 @app.route('/urls', methods=['post'])
 def urls_post():
     url_raw = request.form.get('url', '')
-    err = validate(url_raw)  # проверка корректности url
-    if err:  # при ошибке возврат на стартовую страницу с выводом ошибки
+    err = validate(url_raw)  # validating url
+    if err:  # if error -> returinig to start page
         flash(err, "alert alert-danger")
         return redirect(url_for('index'))
-    # если ошибок нет, то добавляем URL в БД и редирект
+    # if no error -> add URL to DataBase and redirect
     url = f'{urlparse(url_raw).scheme}://{urlparse(url_raw).hostname}'
     try:
-        # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT id
@@ -63,7 +62,7 @@ def urls_post():
                                    VALUES (%s, %s)
                                    RETURNING id'''
                     cur.execute(sql_query, (url, dt))
-                    connection.commit()  # подтверждение изменения
+                    connection.commit()  # confirmation of change in DB
                     id = cur.fetchone().id
                     flash('Страница успешно добавлена', "alert alert-success")
     except (Exception, Error) as error:
@@ -80,11 +79,10 @@ def validate(url: str) -> str:
     return err
 
 
-# Список проверенных сайтов (Read)
+# View list of checked sites (cRud)
 @app.route('/urls')
 def urls_get():
     try:
-        # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT
@@ -104,11 +102,10 @@ def urls_get():
         data=data)
 
 
-# Отображение (show.html) - cRud
+# Display specific site in show.html (cRud)
 @app.route('/urls/<int:id>')
 def url_get(id):
     try:
-        # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
@@ -132,11 +129,10 @@ def url_get(id):
         messages=mes)
 
 
-# Обновление сущности (Update). Обработка данных формы от show.html
+# Update of entity (crUd). Processing data form show.html
 @app.route('/urls/<int:id>/checks', methods=['post'])
 def url_post(id):
     try:
-        # коннект к существуюей базе данных с помощью DB_URL
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
                 sql_query = """SELECT *
