@@ -6,7 +6,8 @@ from datetime import date
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
-import requests
+import requests  # check url status_code
+from bs4 import BeautifulSoup
 from contextlib import closing  # improving functional context menu
 from flask import (
     Flask,
@@ -140,15 +141,31 @@ def url_post(id):
                                WHERE id = (%s)"""
                 cur.execute(sql_query, (id,))
                 query_data = cur.fetchone()
-                data = requests.get(query_data.name)
-                status_code = data.status_code
+                r = requests.get(query_data.name)  # make get request
+                status_code = r.status_code
                 if status_code != 200:
                     flash('Произошла ошибка при проверке', "alert alert-danger")
                     return redirect(url_for('url_get', id=id))
+                # using BeutifilSoup for checking html code and collect data from site
+                soup = BeautifulSoup(r.text, "html.parser")
+                h1, title, descr = None, None, None
+                if soup.find('h1'):
+                    h1 = soup.find('h1').text
+                if soup.find('title'):
+                    title = soup.find('title').text
+                for x in soup.find_all('meta'):
+                    if x.get('name') == 'description':
+                        descr = x.get('content')
                 dt = date.today()
-                sql_query = '''INSERT INTO url_checks (url_id, status_code, created_at)
-                               VALUES (%s, %s, %s)'''
-                cur.execute(sql_query, (id, status_code, dt))
+                sql_query = '''INSERT INTO url_checks
+                                (url_id,
+                                status_code,
+                                h1,
+                                title,
+                                description,
+                                created_at)
+                               VALUES (%s, %s, %s, %s, %s, %s)'''
+                cur.execute(sql_query, (id, status_code, h1, title, descr, dt))
                 connection.commit()  # подтверждение изменения
                 flash('Страница успешно проверена', "alert alert-success")
     except (Exception, Error) as error:
