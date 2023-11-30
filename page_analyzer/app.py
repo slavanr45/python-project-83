@@ -141,29 +141,17 @@ def url_post(id):
                                WHERE id = (%s)"""
                 cur.execute(sql_query, (id,))
                 query_data = cur.fetchone()
-                r = requests.get(query_data.name)  # make get request
-                status_code = r.status_code
+                responce = requests.get(query_data.name)  # make get request
+                status_code = responce.status_code  # check site status code
                 if status_code != 200:
                     flash('Произошла ошибка при проверке', "alert alert-danger")
                     return redirect(url_for('url_get', id=id))
                 # using BeutifilSoup for checking html code and collect data from site
-                soup = BeautifulSoup(r.text, "html.parser")
-                h1, title, descr = None, None, None
-                if soup.find('h1'):
-                    h1 = soup.find('h1').text
-                if soup.find('title'):
-                    title = soup.find('title').text
-                for x in soup.find_all('meta'):
-                    if x.get('name') == 'description':
-                        descr = x.get('content')
+                h1, title, descr = collect_data(responce)
                 dt = date.today()
                 sql_query = '''INSERT INTO url_checks
-                                (url_id,
-                                status_code,
-                                h1,
-                                title,
-                                description,
-                                created_at)
+                                (url_id, status_code, h1,
+                                title, description, created_at)
                                VALUES (%s, %s, %s, %s, %s, %s)'''
                 cur.execute(sql_query, (id, status_code, h1, title, descr, dt))
                 connection.commit()  # подтверждение изменения
@@ -171,3 +159,16 @@ def url_post(id):
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return redirect(url_for('url_get', id=id))
+
+
+def collect_data(responce):
+    soup = BeautifulSoup(responce.text, "html.parser")
+    a, b, c = None, None, None
+    if soup.find('h1'):
+        a = soup.find('h1').text
+    if soup.find('title'):
+        b = soup.find('title').text
+    for x in soup.find_all('meta'):
+        if x.get('name') == 'description':
+            c = x.get('content')
+    return a, b, c
