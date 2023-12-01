@@ -1,13 +1,11 @@
 import os  # access to environment variables
 from dotenv import load_dotenv  # load environment variables
-import validators  # check url
 from urllib.parse import urlparse
 from datetime import date
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 from psycopg2 import Error
 import requests  # check url status_code
-from bs4 import BeautifulSoup
 from contextlib import closing  # improving functional context menu
 from flask import (
     Flask,
@@ -16,8 +14,10 @@ from flask import (
     request,
     flash,
     get_flashed_messages,
-    url_for
-)
+    url_for)
+from page_analyzer.validator import validate
+from page_analyzer.search import search_data
+
 
 app = Flask(__name__)
 # удалить тестилку
@@ -71,15 +71,6 @@ def urls_post():
     return redirect(url_for('url_get', id=id))
 
 
-def validate(url: str) -> str:
-    err = ''
-    if not url:
-        err = 'URL обязателен'
-    elif len(url) > 255 or not validators.url(url):
-        err = 'Некорректный URL'
-    return err
-
-
 # View list of checked sites (cRud)
 @app.route('/urls')
 def urls_get():
@@ -99,7 +90,7 @@ def urls_get():
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return render_template(
-        'urls/index.html',
+        'list.html',
         data=data)
 
 
@@ -124,7 +115,7 @@ def url_get(id):
         print('Can`t establish connection to database', error)
     mes = get_flashed_messages(with_categories=True)
     return render_template(
-        'urls/show.html',
+        'show.html',
         curent_url=curent_url,
         url_check=url_check,
         messages=mes)
@@ -141,13 +132,14 @@ def url_post(id):
                                WHERE id = (%s)"""
                 cur.execute(sql_query, (id,))
                 query_data = cur.fetchone()
-                responce = requests.get(query_data.name)  # make get request
-                status_code = responce.status_code  # check site status code
-                if status_code != 200:
+                try:
+                    responce = requests.get(query_data.name, timeout=3)  # make get request
+                except:
                     flash('Произошла ошибка при проверке', "alert alert-danger")
                     return redirect(url_for('url_get', id=id))
+                status_code = responce.status_code  # check site status code
                 # using BeutifilSoup for checking html code and collect data from site
-                h1, title, descr = collect_data(responce)
+                h1, title, descr = search_data(responce)
                 dt = date.today()
                 sql_query = '''INSERT INTO url_checks
                                 (url_id, status_code, h1,
@@ -159,16 +151,3 @@ def url_post(id):
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return redirect(url_for('url_get', id=id))
-
-
-def collect_data(responce):
-    soup = BeautifulSoup(responce.text, "html.parser")
-    a, b, c = None, None, None
-    if soup.find('h1'):
-        a = soup.find('h1').text
-    if soup.find('title'):
-        b = soup.find('title').text
-    for x in soup.find_all('meta'):
-        if x.get('name') == 'description':
-            c = x.get('content')
-    return a, b, c
