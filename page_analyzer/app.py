@@ -19,7 +19,7 @@ from page_analyzer.search import search_data
 
 
 app = Flask(__name__)
-# удалить тестилку
+# удалить  тестилку
 test1 = 'test1'
 # load environment variables from hidden file
 load_dotenv()
