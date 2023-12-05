@@ -77,7 +77,7 @@ def urls_get():
     try:
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
-                sql_query = """SELECT
+                sql_query = """SELECT DISTINCT ON (urls.id)
                                     urls.id,
                                     urls.name,
                                     url_checks.status_code,
@@ -133,7 +133,7 @@ def url_post(id):
                 cur.execute(sql_query, (id,))
                 query_data = cur.fetchone()
                 try:
-                    responce = requests.get(query_data.name, timeout=3)  # make get request
+                    responce = requests.get(query_data.name, timeout=4)  # make get request
                 except:
                     flash('Произошла ошибка при проверке', "alert alert-danger")
                     return redirect(url_for('url_get', id=id))
