@@ -45,7 +45,7 @@ def urls_post():
         flash(err, "alert alert-danger")
         return redirect(url_for('index'))
     # if no error -> add URL to DataBase and redirect
-    url = f'{urlparse(url_raw).scheme}://{urlparse(url_raw).hostname}'
+    url = f'{urlparse(url_raw).scheme}://{urlparse(url_raw).netloc}'
     try:
         with closing(psycopg2.connect(DATABASE_URL)) as connection:
             with connection.cursor(cursor_factory=NamedTupleCursor) as cur:
