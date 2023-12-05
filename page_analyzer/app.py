@@ -131,10 +131,12 @@ def url_post(id):
                 try:
                     # make get request
                     responce = requests.get(query_data.name, timeout=4)
+                    status_code = responce.status_code  # check site status code
+                    if status_code != 200:
+                        raise ValueError
                 except:
                     flash('Произошла ошибка при проверке', 'error')
                     return redirect(url_for('url_get', id=id))
-                status_code = responce.status_code  # check site status code
                 # using BeutifilSoup for checking html code and collect data
                 h1, title, descr = search_data(responce)
                 dt = date.today()
