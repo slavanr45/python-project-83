@@ -13,7 +13,6 @@ from flask import (
     render_template,
     request,
     flash,
-    get_flashed_messages,
     url_for)
 from page_analyzer.validator import validate
 from page_analyzer.search import search_data
@@ -31,9 +30,8 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 # starting page
 @app.route('/')
 def index():
-    mes = get_flashed_messages(with_categories=True)
     return render_template(
-        'index.html', messages=mes)
+        'index.html')
 
 
 # Create entity (Crud). Processing data form index.html
@@ -42,7 +40,7 @@ def urls_post():
     url_raw = request.form.get('url', '')
     err = validate(url_raw)  # validating url
     if err:  # if error -> returinig to start page
-        flash(err, "alert alert-danger")
+        flash(err, 'error')
         return redirect(url_for('index'))
     # if no error -> add URL to DataBase and redirect
     url = f'{urlparse(url_raw).scheme}://{urlparse(url_raw).netloc}'
@@ -56,7 +54,7 @@ def urls_post():
                 query_data = cur.fetchone()
                 if query_data is not None:
                     id = query_data.id
-                    flash('Страница уже существует', "alert alert-info")
+                    flash('Страница уже существует', 'info')
                 else:
                     dt = date.today()
                     sql_query = '''INSERT INTO urls (name, created_at)
@@ -65,7 +63,7 @@ def urls_post():
                     cur.execute(sql_query, (url, dt))
                     connection.commit()  # confirmation of change in DB
                     id = cur.fetchone().id
-                    flash('Страница успешно добавлена', "alert alert-success")
+                    flash('Страница успешно добавлена', 'success')
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return redirect(url_for('url_get', id=id))
@@ -113,12 +111,10 @@ def url_get(id):
                 url_check = cur.fetchall()
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
-    mes = get_flashed_messages(with_categories=True)
     return render_template(
         'show.html',
         curent_url=curent_url,
-        url_check=url_check,
-        messages=mes)
+        url_check=url_check)
 
 
 # Update of entity (crUd). Processing data form show.html
@@ -136,7 +132,7 @@ def url_post(id):
                     # make get request
                     responce = requests.get(query_data.name, timeout=4)
                 except:
-                    flash('Произошла ошибка при проверке', "alert alert-danger")
+                    flash('Произошла ошибка при проверке', 'error')
                     return redirect(url_for('url_get', id=id))
                 status_code = responce.status_code  # check site status code
                 # using BeutifilSoup for checking html code and collect data
@@ -148,7 +144,7 @@ def url_post(id):
                                VALUES (%s, %s, %s, %s, %s, %s) '''
                 cur.execute(sql_query, (id, status_code, h1, title, descr, dt))
                 connection.commit()  # подтверждение изменения
-                flash('Страница успешно проверена', "alert alert-success")
+                flash('Страница успешно проверена', 'success')
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return redirect(url_for('url_get', id=id))
