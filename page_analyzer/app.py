@@ -23,7 +23,7 @@ app = Flask(__name__)
 test1 = 'test1'
 # load environment variables from hidden file
 load_dotenv()
-app.secret_key = 'secretttt' #os.getenv('SECRET')
+app.secret_key = 'secretttt'  # os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
@@ -41,7 +41,8 @@ def urls_post():
     err = validate(url_raw)  # validating url
     if err:  # if error -> returinig to start page
         flash(err, 'error')
-        return redirect(url_for('index'))
+        return render_template(
+            'index.html'), 422
     # if no error -> add URL to DataBase and redirect
     url = f'{urlparse(url_raw).scheme}://{urlparse(url_raw).netloc}'
     try:
