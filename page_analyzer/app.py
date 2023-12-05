@@ -133,12 +133,13 @@ def url_post(id):
                 cur.execute(sql_query, (id,))
                 query_data = cur.fetchone()
                 try:
-                    responce = requests.get(query_data.name, timeout=4)  # make get request
+                    # make get request
+                    responce = requests.get(query_data.name, timeout=4)
                 except:
                     flash('Произошла ошибка при проверке', "alert alert-danger")
                     return redirect(url_for('url_get', id=id))
                 status_code = responce.status_code  # check site status code
-                # using BeutifilSoup for checking html code and collect data from site
+                # using BeutifilSoup for checking html code and collect data
                 h1, title, descr = search_data(responce)
                 dt = date.today()
                 sql_query = '''INSERT INTO url_checks
