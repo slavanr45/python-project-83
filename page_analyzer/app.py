@@ -142,7 +142,7 @@ def url_post(id):
                 sql_query = '''INSERT INTO url_checks
                                 (url_id, status_code, h1,
                                 title, description, created_at)
-                               VALUES (%s, %s, %s, %s, %s, %s) '''
+                               VALUES (%s, %s, %s, %s, %s, %s)'''
                 cur.execute(sql_query, (id, status_code, h1, title, descr, dt))
                 connection.commit()  # подтверждение изменения
                 flash('Страница успешно проверена', 'success')
