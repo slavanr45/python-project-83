@@ -1,6 +1,7 @@
-import validators  # check url
+import validators
 
 
+# validation url address
 def validate(url: str) -> str:
     err = ''
     if not url:

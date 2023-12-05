@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 
 
+# search certan information by attributes
 def search_data(responce):
     soup = BeautifulSoup(responce.text, "html.parser")
     a, b, c = None, None, None
