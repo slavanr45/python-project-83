@@ -23,7 +23,7 @@ app = Flask(__name__)
 test1 = 'test1'
 # load environment variables from hidden file
 load_dotenv()
-app.secret_key = 'secretttt'  # os.getenv('SECRET')
+app.secret_key = os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
