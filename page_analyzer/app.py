@@ -23,7 +23,7 @@ test1 = 'test1'
 # load environment variables from hidden file
 load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET')
+app.secret_key = 'remove_comment_in_this_line'  # os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
@@ -40,7 +40,7 @@ def urls_post():
     url_raw = request.form.get('url', '')
     err = validate(url_raw)  # validating url
     if err:  # if error -> returinig to start page
-        flash(err, 'error')
+        flash(err, 'alert alert-danger')
         return render_template(
             'index.html'), 422
     # if no error -> add URL to DataBase and redirect
@@ -55,7 +55,7 @@ def urls_post():
                 query_data = cur.fetchone()
                 if query_data is not None:
                     id = query_data.id
-                    flash('Страница уже существует', 'info')
+                    flash('Страница уже существует', 'alert alert-info')
                 else:
                     dt = date.today()
                     sql_query = '''INSERT INTO urls (name, created_at)
@@ -64,7 +64,7 @@ def urls_post():
                     cur.execute(sql_query, (url, dt))
                     connection.commit()  # confirmation of change in DB
                     id = cur.fetchone().id
-                    flash('Страница успешно добавлена', 'success')
+                    flash('Страница успешно добавлена', 'alert alert-success')
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return redirect(url_for('url_get', id=id))
@@ -134,7 +134,7 @@ def url_post(id):
                     responce = requests.get(query_data.name, timeout=4)
                     responce.raise_for_status()
                 except requests.RequestException:
-                    flash('Произошла ошибка при проверке', 'error')
+                    flash('Произошла ошибка при проверке', 'alert alert-danger')
                     return redirect(url_for('url_get', id=id))
                 status_code = responce.status_code  # check site status code
                 # using BeutifilSoup for checking html code and collect data
@@ -146,7 +146,7 @@ def url_post(id):
                                VALUES (%s, %s, %s, %s, %s, %s)'''
                 cur.execute(sql_query, (id, status_code, h1, title, descr, dt))
                 connection.commit()  # подтверждение изменения
-                flash('Страница успешно проверена', 'success')
+                flash('Страница успешно проверена', 'alert alert-success')
     except (Exception, Error) as error:
         print('Can`t establish connection to database', error)
     return redirect(url_for('url_get', id=id))
