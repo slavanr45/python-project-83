@@ -18,11 +18,11 @@ from page_analyzer.validator import validate
 from page_analyzer.search import search_data
 
 
-app = Flask(__name__)
 # удалить  тестилку
 test1 = 'test1'
 # load environment variables from hidden file
 load_dotenv()
+app = Flask(__name__)
 app.secret_key = os.getenv('SECRET')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
