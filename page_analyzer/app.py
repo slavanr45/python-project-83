@@ -18,8 +18,6 @@ from page_analyzer.validator import validate
 from page_analyzer.search import search_data
 
 
-# удалить  тестилку
-test1 = 'test1'
 # load environment variables from hidden file
 load_dotenv()
 app = Flask(__name__)
