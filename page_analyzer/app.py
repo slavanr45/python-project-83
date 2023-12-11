@@ -21,7 +21,7 @@ from page_analyzer.search import search_data
 # load environment variables from hidden file
 load_dotenv()
 app = Flask(__name__)
-app.secret_key = 'remove_comment_in_this_line'  # os.getenv('SECRET')
+app.secret_key = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
